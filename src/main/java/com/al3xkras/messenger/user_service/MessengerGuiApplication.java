@@ -16,8 +16,6 @@ import org.springframework.web.client.RestTemplate;
 		HibernateJpaAutoConfiguration.class,
 		SecurityAutoConfiguration.class
 })
-@EntityScan("com.al3xkras.messenger")
-@ComponentScan({"com.al3xkras.messenger.user_service","com.al3xkras.messenger.model"})
 public class MessengerGuiApplication {
 
 	public static void main(String[] args) {
