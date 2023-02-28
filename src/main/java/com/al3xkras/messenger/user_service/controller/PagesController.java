@@ -13,4 +13,14 @@ public class PagesController {
         return "index";
     }
 
+    @GetMapping("/register")
+    public String registerPage(){
+        return "register";
+    }
+
+    @GetMapping("/login")
+    public String loginPage(){
+        return "login";
+    }
+
 }
