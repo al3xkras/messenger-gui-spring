@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.al3xkras</groupId>
-	<artifactId>messenger-gui</artifactId>
+	<artifactId>messenger-gui-service</artifactId>
 	<version>1.1</version>
-	<name>messenger-gui</name>
-	<description>messenger-gui</description>
+	<name>messenger-gui-service</name>
+	<description>messenger-gui-service</description>
 
 	<distributionManagement>
 		<repository>

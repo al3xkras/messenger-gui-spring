@@ -1,5 +1,6 @@
 package com.al3xkras.messenger.user_service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,6 +26,11 @@ public class MessengerGuiApplication {
 	@Bean
 	public RestTemplate restTemplate(){
 		return new RestTemplate();
+	}
+
+	@Bean
+	public ObjectMapper objectMapper(){
+		return new ObjectMapper();
 	}
 
 }
