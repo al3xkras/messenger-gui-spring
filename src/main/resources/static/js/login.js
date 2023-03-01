@@ -15,7 +15,7 @@ document.getElementById("btn-login").addEventListener("click",()=>{
             const refresh=response['refresh-token']
 
             if (access){
-                setCookie("user-access-token","Bearer "+access,7)
+                setCookie(usr_access,"Bearer "+access,7)
                 alert("login successful")
                 document.location="/user/index"
             } else {
