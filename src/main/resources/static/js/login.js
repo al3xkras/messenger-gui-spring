@@ -2,7 +2,8 @@ const input_username = document.getElementById("username")
 const input_password = document.getElementById("password")
 document.getElementById("btn-login").addEventListener("click",()=>{
     const login_form = new FormData();
-    login_form.append( "username",input_username.value)
+    let username=input_username.value
+    login_form.append( "username",username)
     login_form.append("password",input_password.value)
     const xhr = new XMLHttpRequest()
     xhr.overrideMimeType("application/json")
@@ -15,6 +16,7 @@ document.getElementById("btn-login").addEventListener("click",()=>{
             const refresh=response['refresh-token']
 
             if (access){
+                setCookie(usr_name,username,7)
                 setCookie(usr_access,"Bearer "+access,7)
                 alert("login successful")
                 document.location="/user/index"

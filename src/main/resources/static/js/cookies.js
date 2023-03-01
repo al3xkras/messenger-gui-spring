@@ -1,4 +1,5 @@
 usr_access="user-access-token"
+usr_name="user-username"
 function setCookie(name,value,days) {
     let expires = "";
     if (days) {

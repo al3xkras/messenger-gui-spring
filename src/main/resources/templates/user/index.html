@@ -26,10 +26,15 @@
 
 </body>
 <script type="text/javascript" th:src="@{/js/cookies.js}"></script>
+<script type="text/javascript" th:src="@{/js/user/user-service.js}"></script>
+<script type="text/javascript" th:src="@{/js/user/index.js}"></script>
 <script>
-    if (!getCookie(usr_access)){
+    if (!getCookie(usr_access) || !getCookie(usr_name)){
         alert("please log in to access this page")
         window.location="/login"
     }
+</script>
+<script>
+    getUserInfo()
 </script>
 </html>
