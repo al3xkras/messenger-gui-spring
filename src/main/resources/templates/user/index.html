@@ -7,19 +7,120 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <style>
-        div .user-info{
+        div.left-navbar{
+            position: absolute;
             margin-left: 20px;
+            width: 250px;
+            height: 100%;
+            margin-right: 75%;
+            background: palevioletred;
+        }
+        div.user-info{
+            background: antiquewhite;
+        }
+        div.label{
+            margin-right: 5px;
+        }
+        div.chat-list-item:hover {
+            background: lightskyblue;
+        }
+        div.top-navbar{
+            margin-left: 20px;
+            margin-bottom: 3px;
+            margin-top: 3px;
+            width: 100%;
+            background: indianred;
+        }
+        button.btn-logout{
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+        div.chat-active{
+            position: absolute;
+            margin-left: 273px;
+            margin-right: 3px;
+            margin-bottom: 3px;
+            height: 100%;
+            background: lightgoldenrodyellow;
+        }
+        div.chats-list{
+            overflow-y: auto;
+            height: 70%;
+            background: red;
         }
     </style>
 </head>
 <body>
-<div class="contents d-flex flex-row">
-    <div class="user-info d-flex flex-column">
-        <div class="user-username" id="user-username"></div>
-        <div class="user-name" id="user-name"></div>
-        <div class="user-surname" id="user-surname"></div>
+<div class="contents">
+    <div class="top-navbar d-flex flex-row">
+        <button class="btn btn-secondary btn-logout">logout</button>
     </div>
-    <div class="chats-div d-flex flex-column">
+</div>
+<div class="contents">
+    <div class="left-navbar">
+        <div class="user-info">
+            <div class="row">
+                <div class="col">
+                    <div class="label">Username</div>
+                </div>
+                <div class="col">
+                    <div id="user-username"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="label">Name</div>
+                </div>
+                <div class="col">
+                    <div id="user-name"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="label">Surname</div>
+                </div>
+                <div class="col">
+                    <div id="user-surname"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="label">User type</div>
+                </div>
+                <div class="col">
+                    <div id="user-type"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="label">Email</div>
+                </div>
+                <div class="col">
+                    <div id="email-address"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="label">Phone number</div>
+                </div>
+                <div class="col">
+                    <div id="phone-number"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chats-list">
+            <div class="chat-list-item">
+                chat 1
+            </div>
+            <div class="chat-list-item">
+                chat 2
+            </div>
+            <div class="chat-list-item">
+                chat 3
+            </div>
+        </div>
+    </div>
+    <div class="chat-active">
         <div class="chat">chat</div>
     </div>
 </div>
@@ -35,6 +136,24 @@
     }
 </script>
 <script>
-    getUserInfo()
+    const divUsername=document.getElementById("user-username")
+    const divName=document.getElementById("user-name")
+    const divSurname=document.getElementById("user-surname")
+    const divUserType=document.getElementById("user-type")
+    const divEmailAddress=document.getElementById("email-address")
+    const divPhoneNumber=document.getElementById("phone-number")
+
+    getUserInfo(xhr=>{
+        console.assert(xhr instanceof XMLHttpRequest)
+        //xhr=new XMLHttpRequest(xhr)
+        console.log(xhr.responseText)
+        let userdata = JSON.parse(xhr.responseText)
+        divUsername.innerHTML=userdata['username']
+        divName.innerHTML=userdata['name']
+        divSurname.innerHTML=userdata['surname']
+        divUserType.innerHTML=userdata['messengerUserType']
+        divEmailAddress.innerHTML=userdata['emailAddress']
+        divPhoneNumber.innerHTML=userdata['phoneNumber']
+    })
 </script>
 </html>
