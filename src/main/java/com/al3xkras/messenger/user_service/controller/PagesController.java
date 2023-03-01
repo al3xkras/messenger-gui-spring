@@ -26,8 +26,6 @@ import java.util.Map;
 public class PagesController {
 
     @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
     private RestTemplate restTemplate;
 
     @GetMapping("/")
@@ -65,7 +63,7 @@ public class PagesController {
      */
     @PostMapping("/login")
     @ResponseBody
-    public Map<String,String> login(@Valid LoginForm loginForm){
+    public Object login(@Valid LoginForm loginForm){
         String uri = MessengerUtils.Property.USER_SERVICE_URI.value();
         log.info("login form: "+loginForm);
 
@@ -80,10 +78,35 @@ public class PagesController {
 
         HttpEntity<MultiValueMap<String,String>> formEntity = new HttpEntity<>(form, headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(uri+"/user/login", HttpMethod.POST,
-                formEntity, Map.class);
+        ResponseEntity<Object> response = restTemplate.exchange(uri+"/user/login", HttpMethod.POST,
+                formEntity, Object.class);
         log.info("response: "+response);
-        return (Map<String, String>) response.getBody();
+        return response.getBody();
+    }
+
+    @PostMapping("/chat/auth")
+    @ResponseBody
+    public Object chatServiceAuth(@RequestParam("user-access-token") String token,
+                                  @RequestParam(value = "chat-name",required = false) String chatName){
+
+        String uri = MessengerUtils.Property.CHAT_SERVICE_URI.value();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED.toString());
+        headers.add("Accept", MediaType.APPLICATION_JSON.toString()); //Optional in case server sends back JSON data
+
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+
+        form.add("user-access-token",token);
+        if (chatName!=null)
+            form.add("chat-name",chatName);
+
+        HttpEntity<MultiValueMap<String,String>> formEntity = new HttpEntity<>(form, headers);
+
+        ResponseEntity<Object> response = restTemplate.exchange(uri+"/auth", HttpMethod.POST,
+                formEntity, Object.class);
+        log.info("response: "+response);
+        return response.getBody();
     }
 
 }

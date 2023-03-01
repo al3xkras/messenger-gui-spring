@@ -45,7 +45,6 @@
         }
         div.chats-list{
             overflow-y: auto;
-            height: 70%;
             background: red;
         }
     </style>
@@ -108,6 +107,7 @@
                 </div>
             </div>
         </div>
+        <button>Create new chat</button>
         <div class="chats-list">
             <div class="chat-list-item">
                 chat 1
@@ -154,6 +154,12 @@
         divUserType.innerHTML=userdata['messengerUserType']
         divEmailAddress.innerHTML=userdata['emailAddress']
         divPhoneNumber.innerHTML=userdata['phoneNumber']
+    })
+
+    getUserChats(xhr=>{
+        console.assert(xhr instanceof XMLHttpRequest)
+        console.log(xhr.responseText)
+        let userdata = JSON.parse(xhr.responseText)
     })
 </script>
 </html>

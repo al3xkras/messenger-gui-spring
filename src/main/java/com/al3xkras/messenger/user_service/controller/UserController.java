@@ -1,8 +1,14 @@
 package com.al3xkras.messenger.user_service.controller;
 
+import com.al3xkras.messenger.dto.PageRequestDto;
+import com.al3xkras.messenger.entity.Chat;
 import com.al3xkras.messenger.model.MessengerUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
@@ -12,12 +18,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @Controller
 public class UserController {
-
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private RestTemplate restTemplate;
 
@@ -36,7 +46,7 @@ public class UserController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", MediaType.APPLICATION_FORM_URLENCODED.toString());
-        headers.add("Accept", MediaType.APPLICATION_JSON.toString()); //Optional in case server sends back JSON data
+        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
         headers.add("Authorization", accessToken);
 
 
@@ -47,4 +57,38 @@ public class UserController {
         log.info("response: "+response.getBody());
         return response.getBody();
     }
+
+    @GetMapping("/user/chats")
+    @ResponseBody
+    public Object getUserChats(@RequestParam(value = "username") String username,
+                              @RequestParam(value = "token") String accessToken) throws JsonProcessingException, URISyntaxException {
+
+        String uri = MessengerUtils.Property.CHAT_SERVICE_URI.value();
+        log.info("username: "+username);
+        log.info("token: "+accessToken);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", MediaType.APPLICATION_JSON.toString());
+        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+        headers.add("Authorization", accessToken);
+
+        //todo remove hardcode
+        int page=0;
+        int size=10;
+
+        RequestEntity<PageRequestDto> request = new RequestEntity<>(
+                new PageRequestDto(page,size),
+                headers,
+                HttpMethod.GET,
+                new URIBuilder(uri+"/chats")
+                        .addParameter("username",username)
+                        .addParameter("page",""+page)
+                        .addParameter("size",""+size).build()
+        );
+        Object response = restTemplate.exchange(request, Object.class);
+        log.info("response: "+response);
+        return response;
+    }
+
+
 }

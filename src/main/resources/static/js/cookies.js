@@ -1,5 +1,12 @@
+//access user service
 usr_access="user-access-token"
+//access a specific chat
+chat_access="chat-access-token"
+//access chat service (create a new chat)
+nochat_access="nochat-access"
+//username cookie
 usr_name="user-username"
+
 function setCookie(name,value,days) {
     let expires = "";
     if (days) {
