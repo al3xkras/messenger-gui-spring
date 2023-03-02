@@ -35,17 +35,22 @@
             padding-top: 2px;
             padding-bottom: 2px;
         }
-        div.chat-active{
+        div.active-chat{
             position: absolute;
             margin-left: 273px;
             margin-right: 3px;
             margin-bottom: 3px;
             height: 100%;
+            width: calc(100% - 253px);
             background: lightgoldenrodyellow;
         }
-        div.chats-list{
+        div.chat-list{
             overflow-y: auto;
             background: red;
+        }
+        div.msg-sender-text{
+            color: blue;
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -113,7 +118,16 @@
         </div>
     </div>
     <div class="active-chat" id="active-chat">
-        <div class="chat">chat</div>
+        <div class="message-input">
+            <label for="message-input"></label>
+            <input type="text" id="message-input">
+            <button id="btn-send-message">Send</button>
+        </div>
+        <div class="message d-flex flex-row">
+            <div class="msg-sender-text">Foo</div>
+            <div class="message-text">Bar</div>
+        </div>
+        <div class="message">Hi</div>
     </div>
 </div>
 
@@ -175,11 +189,35 @@
                         const response=JSON.parse(xhr.responseText)
                         console.log(xhr.responseText)
                         displayChatMessages(response)
+                        activeChatName=chat_name
                     })
                 })
             })
             divChatList.appendChild(chatElement)
         }
+    })
+</script>
+<script>
+    let activeChatName=null
+    const btnSendMessage=document.getElementById("btn-send-message")
+    btnSendMessage.addEventListener("click", ()=>{
+        if (!activeChatName)
+            return
+
+        const token = getCookie(chat_access)
+        const jwtData=parseJwt(token.split(" ")[1])
+        const data = JSON.stringify({
+            "userId":jwtData['user-id'],
+            "chatId":jwtData['chat-id'],
+            "submissionDate":new Date(),
+            "message":"FooBar"
+        })
+        console.assert(jwtData['user-id'] && jwtData['chat-id'])
+        console.log(jwtData)
+
+        sendRequest("/chat/message?token="+token,"POST",data,"application/json;charset=UTF-8",xhr=>{
+            console.assert(xhr.status===200)
+        })
     })
 </script>
 </html>

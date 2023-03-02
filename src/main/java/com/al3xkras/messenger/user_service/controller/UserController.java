@@ -1,5 +1,6 @@
 package com.al3xkras.messenger.user_service.controller;
 
+import com.al3xkras.messenger.dto.MessageDTO;
 import com.al3xkras.messenger.dto.PageRequestDto;
 import com.al3xkras.messenger.entity.Chat;
 import com.al3xkras.messenger.model.MessengerUtils;
@@ -13,11 +14,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -151,6 +151,40 @@ public class UserController {
                 HttpMethod.GET,
                 uriBuilder.build()
         );
+        Object response = restTemplate.exchange(request, Object.class);
+        log.info("response: "+response);
+        return response;
+
+    }
+
+    @PostMapping("/chat/message")
+    @ResponseBody
+    public Object postChatMessage(@RequestParam(value = "token") String token,
+                                  @RequestBody @Valid MessageDTO messageDTO) throws URISyntaxException {
+
+        String uri = MessengerUtils.Property.MESSAGE_SERVICE_URI.value();
+        log.info("token: "+token);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", MediaType.APPLICATION_JSON.toString());
+        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+        headers.add("Authorization", token);
+
+        //todo remove hardcode
+        int page=0;
+        int size=10;
+
+        URIBuilder uriBuilder = new URIBuilder(uri+"/message");
+        uriBuilder.addParameter("page",""+page);
+        uriBuilder.addParameter("size",""+size);
+
+        RequestEntity<MessageDTO> request = new RequestEntity<>(
+                messageDTO,
+                headers,
+                HttpMethod.POST,
+                uriBuilder.build()
+        );
+
         Object response = restTemplate.exchange(request, Object.class);
         log.info("response: "+response);
         return response;

@@ -6,6 +6,16 @@ chat_access="chat-access-token"
 nochat_access="nochat-access"
 //username cookie
 usr_name="user-username"
+user_data="user-data"
+
+function parseJwt (token) {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+}
 
 function setCookie(name,value,days) {
     let expires = "";
@@ -83,7 +93,8 @@ function initChatServiceTokens(chat_name,hide_alert,token_consumer){
             if (access){
                 const token = "Bearer "+access;
                 setCookie(cookie_name,token,7)
-                token_consumer(token)
+                if (token_consumer)
+                    token_consumer(token)
                 if (!hide_alert) {
                     alert("auth successful")
                     document.location="/user/index"

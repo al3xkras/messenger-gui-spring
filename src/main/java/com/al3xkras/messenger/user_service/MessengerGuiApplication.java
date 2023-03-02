@@ -30,7 +30,9 @@ public class MessengerGuiApplication {
 
 	@Bean
 	public ObjectMapper objectMapper(){
-		return new ObjectMapper();
+		ObjectMapper o =  new ObjectMapper();
+		o.findAndRegisterModules();
+		return o;
 	}
 
 }
