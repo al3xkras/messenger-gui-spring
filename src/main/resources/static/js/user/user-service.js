@@ -1,6 +1,5 @@
 
-
-function sendUserServiceRequest(url,method,data,mime_type, xhr_consumer) {
+function sendRequest(url, method, data, mime_type, xhr_consumer) {
     const access_token=getCookie(usr_access)
     const xhr = new XMLHttpRequest()
     xhr.onload=()=>xhr_consumer(xhr)
@@ -10,3 +9,4 @@ function sendUserServiceRequest(url,method,data,mime_type, xhr_consumer) {
     xhr.setRequestHeader("Authorization",access_token)
     xhr.send(data)
 }
+

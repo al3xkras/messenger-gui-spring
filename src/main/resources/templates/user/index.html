@@ -112,7 +112,7 @@
             <div id="chat-list-item" class="chat-list-item" hidden></div>
         </div>
     </div>
-    <div class="chat-active">
+    <div class="active-chat" id="active-chat">
         <div class="chat">chat</div>
     </div>
 </div>
@@ -136,6 +136,7 @@
     const divPhoneNumber=document.getElementById("phone-number")
     const divChatListItem=document.getElementById("chat-list-item")
     const divChatList=document.getElementById("chat-list")
+    const divActiveChat=document.getElementById("active-chat")
 
     getUserInfo(xhr=>{
         console.assert(xhr instanceof XMLHttpRequest)
@@ -151,6 +152,10 @@
         divPhoneNumber.innerHTML=userdata['phoneNumber']
     })
 
+    function displayChatMessages(response){
+        const container=divActiveChat
+        console.log(response)
+    }
     getUserChats(xhr=>{
         console.assert(xhr instanceof XMLHttpRequest)
         console.log(xhr.responseText)
@@ -164,17 +169,17 @@
             chatElement.innerHTML=chat['chatDisplayName']
             chatElement.addEventListener("click",()=>{
                 const chat_name=chat['chatName']
-                initChatServiceTokens(chat_name,true)
-                let token = getCookie(chat_access)
-                sendUserServiceRequest("/chat?chat-name="+chat_name+"&token="+token,"GET",null,null,xhr=>{
-                    console.assert(xhr.status===200)
-                    const response=xhr.responseText
-                    console.log(response)
+                initChatServiceTokens(chat_name,true,token=>{
+                    sendRequest("/chat/messages?chat-name="+chat_name+"&token="+token,"GET",null,null, xhr=>{
+                        console.assert(xhr.status===200)
+                        const response=JSON.parse(xhr.responseText)
+                        console.log(xhr.responseText)
+                        displayChatMessages(response)
+                    })
                 })
             })
             divChatList.appendChild(chatElement)
         }
-
     })
 </script>
 </html>

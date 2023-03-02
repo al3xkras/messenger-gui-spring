@@ -61,7 +61,7 @@ function initUserServiceTokens(username,password){
     xhr.send(login_form)
 }
 
-function initChatServiceTokens(chat_name,hide_alert){
+function initChatServiceTokens(chat_name,hide_alert,token_consumer){
     const user_token = getCookie(usr_access)
     const login_form = new FormData();
     login_form.append( "user-access-token",user_token)
@@ -81,7 +81,9 @@ function initChatServiceTokens(chat_name,hide_alert){
             const refresh=response['refresh-token']
 
             if (access){
-                setCookie(cookie_name,"Bearer "+access,7)
+                const token = "Bearer "+access;
+                setCookie(cookie_name,token,7)
+                token_consumer(token)
                 if (!hide_alert) {
                     alert("auth successful")
                     document.location="/user/index"
