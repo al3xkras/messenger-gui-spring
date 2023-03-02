@@ -112,22 +112,33 @@
                 </div>
             </div>
         </div>
-        <button>Create new chat</button>
+        <button id="btn-create-chat" onclick="createChatDialog.dialog.showModal()">Create new chat</button>
+        <dialog id="create-chat-dialog">
+            <label for="input-chat-name">Chat name</label>
+            <input id="input-chat-name" type="text">
+            <br>
+            <label for="input-chat-display-name">Display name</label>
+            <input id="input-chat-display-name" type="text">
+            <br>
+            <button type="submit" onclick="createChatDialog.createChat()">Create</button>
+        </dialog>
         <div class="chat-list" id="chat-list">
             <div id="chat-list-item" class="chat-list-item" hidden></div>
         </div>
     </div>
     <div class="active-chat" id="active-chat">
-        <div class="message-input">
+        <div class="message-input" id="div-message-input">
             <label for="message-input"></label>
             <input type="text" id="message-input">
             <button id="btn-send-message">Send</button>
         </div>
-        <div class="message d-flex flex-row">
-            <div class="msg-sender-text">Foo</div>
-            <div class="message-text">Bar</div>
+        <div class="message" id="message-template" hidden>
+            <div class=" d-flex flex-row">
+                <div class="msg-sender-text">Foo</div>
+                <div class="msg-date-text">12.12.2112</div>
+                <div class="message-text">Bar</div>
+            </div>
         </div>
-        <div class="message">Hi</div>
     </div>
 </div>
 
@@ -152,6 +163,41 @@
     const divChatList=document.getElementById("chat-list")
     const divActiveChat=document.getElementById("active-chat")
 
+    const messageTemplate=document.getElementById("message-template")
+    const divMessageInput=document.getElementById("div-message-input")
+    const messageInput=document.getElementById("message-input")
+    const btnCreateChat=document.getElementById("btn-create-chat")
+    const createChatDialog = {
+        dialog:document.getElementById("create-chat-dialog"),
+        inputChatName:document.getElementById("input-chat-name"),
+        inputDisplayName:document.getElementById("input-chat-display-name"),
+        createChat:function () {
+            const token=getCookie(nochat_access)
+            const dialog=createChatDialog.dialog;
+            const jwtData=parseJwt(token.split(" ")[1])
+            console.assert(jwtData['user-id'])
+            const chat = {
+                "chatName":this.inputChatName.value,
+                "displayName":this.inputDisplayName.value,
+                "ownerId":jwtData["user-id"]
+            }
+            createChat(chat)
+            dialog.close()
+        }
+    }
+
+    function newInstance(clazz, arguments, scope) {
+        return new (Function.prototype.bind.apply(clazz, [scope].concat(arguments)));
+    }
+
+    function createChat(chat){
+        let token = getCookie(nochat_access)
+        sendRequest("/chat?token="+token,"POST",JSON.stringify(chat),"application/json",xhr=>{
+            console.assert(xhr.status===200)
+            addChat(chat)
+        })
+    }
+
     getUserInfo(xhr=>{
         console.assert(xhr instanceof XMLHttpRequest)
         //xhr=new XMLHttpRequest(xhr)
@@ -166,9 +212,52 @@
         divPhoneNumber.innerHTML=userdata['phoneNumber']
     })
 
-    function displayChatMessages(response){
+    function addMessage(message){
         const container=divActiveChat
+        const messageNode=messageTemplate.cloneNode(true)
+
+
+        const msg_sender=messageNode.querySelectorAll(".msg-sender-text")[0]
+        const msg_text=messageNode.querySelectorAll(".message-text")[0]
+        const msg_date=messageNode.querySelectorAll(".msg-date-text")[0]
+        msg_sender.innerHTML=message["userId"]
+        msg_date.innerHTML=newInstance(Date,message["submissionDate"])
+        msg_text.innerHTML=message["message"]
+        messageNode.hidden=null
+        container.appendChild(messageNode)
+    }
+
+    function displayChatMessages(response){
+        const messages=response['content']
+        divActiveChat.innerHTML=''
+        divActiveChat.appendChild(divMessageInput)
+        divActiveChat.appendChild(messageTemplate)
+        for (const id in messages){
+            const message=messages[id]
+            console.log(message)
+            addMessage(message)
+        }
         console.log(response)
+    }
+    function addChat(chat) {
+        let chatElement = divChatListItem.cloneNode()
+        chatElement.hidden=null
+        let displayName=chat['chatDisplayName']
+        displayName=displayName?displayName:chat['displayName']
+        chatElement.innerHTML=displayName
+        chatElement.addEventListener("click",()=>{
+            const chat_name=chat['chatName']
+            initChatServiceTokens(chat_name,true,token=>{
+                sendRequest("/chat/messages?chat-name="+chat_name+"&token="+token,"GET",null,null, xhr=>{
+                    console.assert(xhr.status===200)
+                    const response=JSON.parse(xhr.responseText)
+                    console.log(xhr.responseText)
+                    displayChatMessages(response)
+                    activeChatName=chat_name
+                })
+            })
+        })
+        divChatList.appendChild(chatElement)
     }
     getUserChats(xhr=>{
         console.assert(xhr instanceof XMLHttpRequest)
@@ -178,24 +267,10 @@
         for (const i in chats) {
             const chat=chats[i]
             console.log(chat)
-            let chatElement = divChatListItem.cloneNode()
-            chatElement.hidden=null
-            chatElement.innerHTML=chat['chatDisplayName']
-            chatElement.addEventListener("click",()=>{
-                const chat_name=chat['chatName']
-                initChatServiceTokens(chat_name,true,token=>{
-                    sendRequest("/chat/messages?chat-name="+chat_name+"&token="+token,"GET",null,null, xhr=>{
-                        console.assert(xhr.status===200)
-                        const response=JSON.parse(xhr.responseText)
-                        console.log(xhr.responseText)
-                        displayChatMessages(response)
-                        activeChatName=chat_name
-                    })
-                })
-            })
-            divChatList.appendChild(chatElement)
+            addChat(chat)
         }
     })
+
 </script>
 <script>
     let activeChatName=null
@@ -206,17 +281,19 @@
 
         const token = getCookie(chat_access)
         const jwtData=parseJwt(token.split(" ")[1])
-        const data = JSON.stringify({
+        const message={
             "userId":jwtData['user-id'],
             "chatId":jwtData['chat-id'],
             "submissionDate":new Date(),
-            "message":"FooBar"
-        })
+            "message":messageInput.value
+        }
+        const data = JSON.stringify(message)
         console.assert(jwtData['user-id'] && jwtData['chat-id'])
         console.log(jwtData)
 
         sendRequest("/chat/message?token="+token,"POST",data,"application/json;charset=UTF-8",xhr=>{
             console.assert(xhr.status===200)
+            addMessage(message)
         })
     })
 </script>

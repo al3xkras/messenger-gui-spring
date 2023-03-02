@@ -1,5 +1,6 @@
 package com.al3xkras.messenger.user_service.controller;
 
+import com.al3xkras.messenger.dto.ChatDTO;
 import com.al3xkras.messenger.dto.MessageDTO;
 import com.al3xkras.messenger.dto.PageRequestDto;
 import com.al3xkras.messenger.entity.Chat;
@@ -180,6 +181,34 @@ public class UserController {
 
         RequestEntity<MessageDTO> request = new RequestEntity<>(
                 messageDTO,
+                headers,
+                HttpMethod.POST,
+                uriBuilder.build()
+        );
+
+        Object response = restTemplate.exchange(request, Object.class);
+        log.info("response: "+response);
+        return response;
+
+    }
+
+    @PostMapping("/chat")
+    @ResponseBody
+    public Object createChat(@RequestParam(value = "token") String token,
+                                  @RequestBody @Valid ChatDTO chatDTO) throws URISyntaxException {
+
+        String uri = MessengerUtils.Property.CHAT_SERVICE_URI.value();
+        log.info("token: "+token);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", MediaType.APPLICATION_JSON.toString());
+        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+        headers.add("Authorization", token);
+
+        URIBuilder uriBuilder = new URIBuilder(uri+"/chat");
+
+        RequestEntity<ChatDTO> request = new RequestEntity<>(
+                chatDTO,
                 headers,
                 HttpMethod.POST,
                 uriBuilder.build()
