@@ -90,5 +90,35 @@ public class UserController {
         return response;
     }
 
+    @GetMapping("/chat")
+    @ResponseBody
+    public Object getChatInfo(@RequestParam(value = "chat-id", required = false) Long chatId,
+                              @RequestParam(value = "chat-name",required = false) String chatName,
+                              @RequestParam(value = "token") String token) throws URISyntaxException {
+
+        String uri = MessengerUtils.Property.CHAT_SERVICE_URI.value();
+        log.info("token: "+token);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", MediaType.APPLICATION_JSON.toString());
+        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+        headers.add("Authorization", token);
+
+        URIBuilder uriBuilder = new URIBuilder(uri+"/chat");
+        if (chatId!=null)
+            uriBuilder.addParameter("chat-id",chatId.toString());
+        if (chatName!=null)
+            uriBuilder.addParameter("chat-name",chatName);
+
+        RequestEntity<PageRequestDto> request = new RequestEntity<>(
+                headers,
+                HttpMethod.GET,
+                uriBuilder.build()
+        );
+        Object response = restTemplate.exchange(request, Object.class);
+        log.info("response: "+response);
+        return response;
+
+    }
 
 }

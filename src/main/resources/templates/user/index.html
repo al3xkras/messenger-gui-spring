@@ -108,16 +108,8 @@
             </div>
         </div>
         <button>Create new chat</button>
-        <div class="chats-list">
-            <div class="chat-list-item">
-                chat 1
-            </div>
-            <div class="chat-list-item">
-                chat 2
-            </div>
-            <div class="chat-list-item">
-                chat 3
-            </div>
+        <div class="chat-list" id="chat-list">
+            <div id="chat-list-item" class="chat-list-item" hidden></div>
         </div>
     </div>
     <div class="chat-active">
@@ -142,10 +134,13 @@
     const divUserType=document.getElementById("user-type")
     const divEmailAddress=document.getElementById("email-address")
     const divPhoneNumber=document.getElementById("phone-number")
+    const divChatListItem=document.getElementById("chat-list-item")
+    const divChatList=document.getElementById("chat-list")
 
     getUserInfo(xhr=>{
         console.assert(xhr instanceof XMLHttpRequest)
         //xhr=new XMLHttpRequest(xhr)
+
         console.log(xhr.responseText)
         let userdata = JSON.parse(xhr.responseText)
         divUsername.innerHTML=userdata['username']
@@ -160,6 +155,26 @@
         console.assert(xhr instanceof XMLHttpRequest)
         console.log(xhr.responseText)
         let userdata = JSON.parse(xhr.responseText)
+        const chats=userdata['content']
+        for (const i in chats) {
+            const chat=chats[i]
+            console.log(chat)
+            let chatElement = divChatListItem.cloneNode()
+            chatElement.hidden=null
+            chatElement.innerHTML=chat['chatDisplayName']
+            chatElement.addEventListener("click",()=>{
+                const chat_name=chat['chatName']
+                initChatServiceTokens(chat_name,true)
+                let token = getCookie(chat_access)
+                sendUserServiceRequest("/chat?chat-name="+chat_name+"&token="+token,"GET",null,null,xhr=>{
+                    console.assert(xhr.status===200)
+                    const response=xhr.responseText
+                    console.log(response)
+                })
+            })
+            divChatList.appendChild(chatElement)
+        }
+
     })
 </script>
 </html>
