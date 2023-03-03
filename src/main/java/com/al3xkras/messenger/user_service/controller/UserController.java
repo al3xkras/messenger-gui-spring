@@ -3,27 +3,20 @@ package com.al3xkras.messenger.user_service.controller;
 import com.al3xkras.messenger.dto.ChatDTO;
 import com.al3xkras.messenger.dto.MessageDTO;
 import com.al3xkras.messenger.dto.PageRequestDto;
-import com.al3xkras.messenger.entity.Chat;
+import com.al3xkras.messenger.model.ChatMessageId;
 import com.al3xkras.messenger.model.MessengerUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-
 @Slf4j
 @Controller
 public class UserController {
@@ -211,6 +204,34 @@ public class UserController {
                 chatDTO,
                 headers,
                 HttpMethod.POST,
+                uriBuilder.build()
+        );
+
+        Object response = restTemplate.exchange(request, Object.class);
+        log.info("response: "+response);
+        return response;
+
+    }
+
+    @DeleteMapping("/chat/message")
+    @ResponseBody
+    public Object deleteChatMessage(@RequestParam(value = "token") String token,
+                             @RequestBody @Valid ChatMessageId id) throws URISyntaxException {
+
+        String uri = MessengerUtils.Property.MESSAGE_SERVICE_URI.value();
+        log.info("token: "+token);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", MediaType.APPLICATION_JSON.toString());
+        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+        headers.add("Authorization", token);
+
+        URIBuilder uriBuilder = new URIBuilder(uri+"/message");
+
+        RequestEntity<ChatMessageId> request = new RequestEntity<>(
+                id,
+                headers,
+                HttpMethod.DELETE,
                 uriBuilder.build()
         );
 

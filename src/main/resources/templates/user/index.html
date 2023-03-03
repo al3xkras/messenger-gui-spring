@@ -52,6 +52,10 @@
             color: blue;
             margin-right: 5px;
         }
+        button.msg-delete-btn{
+            padding-top: 0;
+            padding-bottom: 0;
+        }
     </style>
 </head>
 <body>
@@ -131,12 +135,14 @@
             <label for="message-input"></label>
             <input type="text" id="message-input">
             <button id="btn-send-message">Send</button>
+            <button id="btn-add-user">Add user</button>
         </div>
         <div class="message" id="message-template" hidden>
             <div class=" d-flex flex-row">
                 <div class="msg-sender-text">Foo</div>
                 <div class="msg-date-text">12.12.2112</div>
                 <div class="message-text">Bar</div>
+                <button class="msg-delete-btn btn btn-danger" hidden>delete</button>
             </div>
         </div>
     </div>
@@ -216,13 +222,36 @@
         const container=divActiveChat
         const messageNode=messageTemplate.cloneNode(true)
 
-
         const msg_sender=messageNode.querySelectorAll(".msg-sender-text")[0]
         const msg_text=messageNode.querySelectorAll(".message-text")[0]
         const msg_date=messageNode.querySelectorAll(".msg-date-text")[0]
+        const msg_delete_btn=messageNode.querySelectorAll(".msg-delete-btn")[0]
         msg_sender.innerHTML=message["userId"]
         msg_date.innerHTML=newInstance(Date,message["submissionDate"])
         msg_text.innerHTML=message["message"]
+        const chatId=message['chatId']
+        console.assert(chatId)
+        const token = getCookie(chat_access)
+        const jwtData=parseJwt(token.split(" ")[1])
+        if (jwtData['user-id']===message['userId']){
+            msg_delete_btn.hidden=null
+            msg_delete_btn.addEventListener("click", ()=>{
+                const data = {
+                    "chatId":message["chatId"],
+                    "userId":message["userId"],
+                    "submissionDate":message["submissionDate"]
+                }
+                sendRequest("/chat/message?token="+token,"DELETE",JSON.stringify(data),"application/json",xhr=>{
+                    if (xhr.status===200){
+                        container.removeChild(messageNode)
+                    } else {
+                        console.warn("message not deleted, response status: "+xhr.status)
+                        console.warn(xhr.responseText)
+                    }
+                })
+            })
+        }
+
         messageNode.hidden=null
         container.appendChild(messageNode)
     }
