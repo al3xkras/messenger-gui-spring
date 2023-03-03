@@ -61,7 +61,7 @@
 <body>
 <div class="contents">
     <div class="top-navbar d-flex flex-row">
-        <button class="btn btn-secondary btn-logout">logout</button>
+        <button class="btn btn-secondary btn-logout" onclick="logout()">logout</button>
     </div>
 </div>
 <div class="contents">
@@ -135,7 +135,19 @@
             <label for="message-input"></label>
             <input type="text" id="message-input">
             <button id="btn-send-message">Send</button>
-            <button id="btn-add-user">Add user</button>
+            <button id="btn-add-user" onclick="addChatUserDialog.dialog.showModal()">Add user</button>
+            <dialog id="add-user-dialog">
+                <label for="input-username">Username</label>
+                <input id="input-username" type="text">
+                <br>
+                <label for="input-user-type" hidden>User type</label>
+                <select id="input-user-type" hidden>
+                    <option>USER</option>
+                    <option>ADMIN</option>
+                </select>
+                <br>
+                <button type="submit" onclick="addChatUserDialog.addUser()">Add</button>
+            </dialog>
         </div>
         <div class="message" id="message-template" hidden>
             <div class=" d-flex flex-row">
@@ -172,7 +184,7 @@
     const messageTemplate=document.getElementById("message-template")
     const divMessageInput=document.getElementById("div-message-input")
     const messageInput=document.getElementById("message-input")
-    const btnCreateChat=document.getElementById("btn-create-chat")
+
     const createChatDialog = {
         dialog:document.getElementById("create-chat-dialog"),
         inputChatName:document.getElementById("input-chat-name"),
@@ -190,6 +202,52 @@
             createChat(chat)
             dialog.close()
         }
+    }
+
+    function getUserByUsername(username,user_consumer){
+        const token=getCookie(usr_access)
+        sendRequest("/user?username="+username+"&token="+token,"GET",null,null,xhr=>{
+            console.assert(xhr.status===200)
+            if (xhr.status===200){
+                let user=JSON.parse(xhr.responseText)
+                user_consumer(user)
+            } else {
+                user_consumer(null)
+            }
+        })
+    }
+
+    const addChatUserDialog = {
+        dialog:document.getElementById("add-user-dialog"),
+        inputUsername:document.getElementById("input-username"),
+        addUser:()=>{
+
+            const token = getCookie(chat_access)
+            const jwtData=parseJwt(token.split(" ")[1])
+            const username=addChatUserDialog.inputUsername.value
+            getUserByUsername(username,user=>{
+                console.log(user)
+                const userDTO = JSON.stringify({
+                    "chatId":jwtData["chat-id"],
+                    "userId":user['messengerUserId'],
+                    "chatUserRole":"USER",
+                    "title":""
+                })
+                sendRequest("/chat/users?username="+username+"&token="+getCookie(chat_access),"POST",userDTO,"application/json",xhr=>{
+                    console.assert(xhr.status===200)
+                    console.log(xhr.responseText)
+                })
+                addChatUserDialog.dialog.close()
+            })
+        }
+    }
+
+    function logout(){
+        eraseCookie(usr_access)
+        eraseCookie(usr_name)
+        eraseCookie(chat_access)
+        eraseCookie(nochat_access)
+        document.location="/"
     }
 
     function newInstance(clazz, arguments, scope) {

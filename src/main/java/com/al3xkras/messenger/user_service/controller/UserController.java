@@ -1,6 +1,7 @@
 package com.al3xkras.messenger.user_service.controller;
 
 import com.al3xkras.messenger.dto.ChatDTO;
+import com.al3xkras.messenger.dto.ChatUserDTO;
 import com.al3xkras.messenger.dto.MessageDTO;
 import com.al3xkras.messenger.dto.PageRequestDto;
 import com.al3xkras.messenger.model.ChatMessageId;
@@ -232,6 +233,62 @@ public class UserController {
                 id,
                 headers,
                 HttpMethod.DELETE,
+                uriBuilder.build()
+        );
+
+        Object response = restTemplate.exchange(request, Object.class);
+        log.info("response: "+response);
+        return response;
+
+    }
+
+    @PostMapping("/chat/users")
+    @ResponseBody
+    public Object addChatUser(@RequestParam(value = "token") String token,
+                             @RequestBody @Valid ChatUserDTO userDTO) throws URISyntaxException {
+
+        String uri = MessengerUtils.Property.CHAT_SERVICE_URI.value();
+        log.info("token: "+token);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", MediaType.APPLICATION_JSON.toString());
+        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+        headers.add("Authorization", token);
+
+        URIBuilder uriBuilder = new URIBuilder(uri+"/chat/users");
+
+        RequestEntity<ChatUserDTO> request = new RequestEntity<>(
+                userDTO,
+                headers,
+                HttpMethod.POST,
+                uriBuilder.build()
+        );
+
+        Object response = restTemplate.exchange(request, Object.class);
+        log.info("response: "+response);
+        return response;
+
+    }
+
+    @GetMapping("/user")
+    @ResponseBody
+    public Object getUserByUsername(@RequestParam(value = "token") String token,
+                              @RequestParam(value = "username") String username) throws URISyntaxException {
+
+        String uri = MessengerUtils.Property.USER_SERVICE_URI.value();
+        log.info("token: "+token);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", MediaType.APPLICATION_JSON.toString());
+        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+        headers.add("Authorization", token);
+
+        URIBuilder uriBuilder = new URIBuilder(uri+"/user");
+        uriBuilder.addParameter("username",username);
+
+        RequestEntity<ChatUserDTO> request = new RequestEntity<>(
+                headers,
+                HttpMethod.GET,
                 uriBuilder.build()
         );
 

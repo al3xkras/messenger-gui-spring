@@ -40,7 +40,7 @@ function eraseCookie(name) {
     document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
-function initUserServiceTokens(username,password){
+function initUserServiceTokens(username,password,token_consumer){
     const login_form = new FormData();
     login_form.append( "username",username)
     login_form.append("password",password)
@@ -57,6 +57,8 @@ function initUserServiceTokens(username,password){
             if (access){
                 setCookie(usr_name,username,7)
                 setCookie(usr_access,"Bearer "+access,7)
+                if (token_consumer)
+                    token_consumer(access)
                 document.location="/user/index"
             } else {
                 return
