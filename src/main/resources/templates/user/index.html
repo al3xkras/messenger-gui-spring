@@ -13,10 +13,8 @@
             width: 250px;
             height: 100%;
             margin-right: 75%;
-            background: palevioletred;
         }
         div.user-info{
-            background: antiquewhite;
         }
         div.label{
             margin-right: 5px;
@@ -29,7 +27,6 @@
             margin-bottom: 3px;
             margin-top: 3px;
             width: 100%;
-            background: indianred;
         }
         button.btn-logout{
             padding-top: 2px;
@@ -42,19 +39,31 @@
             margin-bottom: 3px;
             height: 100%;
             width: calc(100% - 253px);
-            background: lightgoldenrodyellow;
         }
         div.chat-list{
             overflow-y: auto;
-            background: red;
         }
         div.msg-sender-text{
             color: blue;
             margin-right: 5px;
         }
+        div.msg-date-text{
+            font-size: 10px;
+            color: deepskyblue;
+        }
+        div.message-text{
+            margin-left: 5px;
+            color: green;
+        }
+        div.message{
+            margin-top: 20px;
+        }
         button.msg-delete-btn{
             padding-top: 0;
             padding-bottom: 0;
+            font-size: 7px;
+            height: 10px;
+            margin-left: 15px;
         }
     </style>
 </head>
@@ -119,10 +128,10 @@
         <button id="btn-create-chat" onclick="createChatDialog.dialog.showModal()">Create new chat</button>
         <dialog id="create-chat-dialog">
             <label for="input-chat-name">Chat name</label>
-            <input id="input-chat-name" type="text">
+            <input id="input-chat-name" type="text" autocomplete="off">
             <br>
             <label for="input-chat-display-name">Display name</label>
-            <input id="input-chat-display-name" type="text">
+            <input id="input-chat-display-name" type="text" autocomplete="off">
             <br>
             <button type="submit" onclick="createChatDialog.createChat()">Create</button>
         </dialog>
@@ -130,15 +139,15 @@
             <div id="chat-list-item" class="chat-list-item" hidden></div>
         </div>
     </div>
-    <div class="active-chat" id="active-chat">
+    <div class="active-chat">
         <div class="message-input" id="div-message-input">
             <label for="message-input"></label>
-            <input type="text" id="message-input">
+            <input type="text" id="message-input" autocomplete="off">
             <button id="btn-send-message">Send</button>
             <button id="btn-add-user" onclick="addChatUserDialog.dialog.showModal()">Add user</button>
             <dialog id="add-user-dialog">
                 <label for="input-username">Username</label>
-                <input id="input-username" type="text">
+                <input id="input-username" type="text" autocomplete="off">
                 <br>
                 <label for="input-user-type" hidden>User type</label>
                 <select id="input-user-type" hidden>
@@ -149,15 +158,22 @@
                 <button type="submit" onclick="addChatUserDialog.addUser()">Add</button>
             </dialog>
         </div>
-        <div class="message" id="message-template" hidden>
-            <div class=" d-flex flex-row">
-                <div class="msg-sender-text">Foo</div>
-                <div class="msg-date-text">12.12.2112</div>
-                <div class="message-text">Bar</div>
-                <button class="msg-delete-btn btn btn-danger" hidden>delete</button>
+        <div id="active-chat">
+            <div class="message" id="message-template" hidden>
+                <div class=" d-flex flex-row">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-row">
+                            <div class="msg-sender-text">Foo</div>
+                            <div class="msg-date-text">12.12.2112</div>
+                        </div>
+                        <div class="message-text">Bar</div>
+                    </div>
+                    <button class="msg-delete-btn btn btn-danger" hidden>delete</button>
+                </div>
             </div>
         </div>
     </div>
+
 </div>
 
 </body>
@@ -184,6 +200,7 @@
     const messageTemplate=document.getElementById("message-template")
     const divMessageInput=document.getElementById("div-message-input")
     const messageInput=document.getElementById("message-input")
+    let update = ()=>{}
 
     const createChatDialog = {
         dialog:document.getElementById("create-chat-dialog"),
@@ -317,7 +334,6 @@
     function displayChatMessages(response){
         const messages=response['content']
         divActiveChat.innerHTML=''
-        divActiveChat.appendChild(divMessageInput)
         divActiveChat.appendChild(messageTemplate)
         for (const id in messages){
             const message=messages[id]
@@ -334,7 +350,7 @@
         chatElement.innerHTML=displayName
         chatElement.addEventListener("click",()=>{
             const chat_name=chat['chatName']
-            initChatServiceTokens(chat_name,true,token=>{
+            update = ()=> initChatServiceTokens(chat_name,true,token=>{
                 sendRequest("/chat/messages?chat-name="+chat_name+"&token="+token,"GET",null,null, xhr=>{
                     console.assert(xhr.status===200)
                     const response=JSON.parse(xhr.responseText)
@@ -343,6 +359,8 @@
                     activeChatName=chat_name
                 })
             })
+            update()
+
         })
         divChatList.appendChild(chatElement)
     }
@@ -357,7 +375,9 @@
             addChat(chat)
         }
     })
-
+    const intervalId = setInterval(function () {
+        update()
+    }, 5000);
 </script>
 <script>
     let activeChatName=null
@@ -380,7 +400,7 @@
 
         sendRequest("/chat/message?token="+token,"POST",data,"application/json;charset=UTF-8",xhr=>{
             console.assert(xhr.status===200)
-            addMessage(message)
+            update()
         })
     })
 </script>

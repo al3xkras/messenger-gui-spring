@@ -59,7 +59,6 @@ function initUserServiceTokens(username,password,token_consumer){
                 setCookie(usr_access,"Bearer "+access,7)
                 if (token_consumer)
                     token_consumer(access)
-                document.location="/user/index"
             } else {
                 return
             }
@@ -99,7 +98,6 @@ function initChatServiceTokens(chat_name,hide_alert,token_consumer){
                     token_consumer(token)
                 if (!hide_alert) {
                     alert("auth successful")
-                    document.location="/user/index"
                 }
                 console.log("auth successful")
             } else {

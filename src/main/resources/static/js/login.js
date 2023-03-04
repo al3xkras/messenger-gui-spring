@@ -6,6 +6,9 @@ document.getElementById("btn-login").addEventListener("click",()=>{
     const input_password = document.getElementById("password")
 
     initUserServiceTokens(input_username.value,input_password.value,token=>{
-        initChatServiceTokens()
+        initChatServiceTokens(null,true,token=>{
+            alert("authenticated")
+            document.location="/user/index"
+        })
     })
 })
